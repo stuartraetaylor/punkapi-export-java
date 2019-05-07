@@ -1,6 +1,8 @@
 [submodule "submodules/punkapi-db"]
-	path = submodules/punkapi-db
-	url = https://github.com/samjbmason/punkapi-db.git
+    path = submodules/punkapi-db
+    url = https://github.com/stuartraetaylor/punkapi-db
+    branch = fix-recipes
 [submodule "submodules/beerxml"]
-	path = submodules/beerxml
-	url = https://github.com/brewpoo/BeerXML-Standard.git
+    path = submodules/beerxml
+    url = https://github.com/stuartraetaylor/BeerXML-Standard.git
+    branch = fix-schema

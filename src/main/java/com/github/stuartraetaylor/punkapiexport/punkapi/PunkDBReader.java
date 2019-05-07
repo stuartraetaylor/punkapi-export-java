@@ -19,8 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PunkDBReader implements PunkReader {
 
-    //private static final File baseDir = Paths.get("submodules/punkapi-db/data").toAbsolutePath().toFile();
-    private static final File baseDir = Paths.get("../punkapi-db/data").toAbsolutePath().toFile();
+    private static final File baseDir = Paths.get("submodules/punkapi-db/data").toAbsolutePath().toFile();
 
 	@Override
     public PunkDocument read(String beerName) throws PunkException {
