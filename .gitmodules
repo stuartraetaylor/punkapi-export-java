@@ -1,0 +1,6 @@
+[submodule "submodules/punkapi-db"]
+	path = submodules/punkapi-db
+	url = https://github.com/samjbmason/punkapi-db.git
+[submodule "submodules/beerxml"]
+	path = submodules/beerxml
+	url = https://github.com/brewpoo/BeerXML-Standard.git

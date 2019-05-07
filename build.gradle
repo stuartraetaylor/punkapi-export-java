@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'jsonschema2pojo'
+    id "org.openrepose.gradle.plugins.jaxb" version "2.5.0"
+}
+
+group = 'com.github.stuartraetaylor.punkapiexport'
+version = '0.1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+
+    jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.1'
+    jaxb 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+}
+
+defaultTasks 'run'
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = '5.4.1'
+}
+
+application {
+    mainClassName = "${group}.Main"
+}
+
+jsonSchema2Pojo {
+    source = files('submodules/punkapi-db/spec/schema.json')
+    targetDirectory = file("${project.buildDir}/generated-sources/js2p")
+    removeOldOutput = false
+
+    targetPackage = "${group}.punkapi.model"
+    classNamePrefix = 'Punk'
+
+    includeGetters = true
+    includeSetters = true
+    useBigDecimals = true
+}
+
+jaxb {
+    xsdDir = "${project.projectDir}/submodules/beerxml/historical/BeerXML v1/"
+    xjc {
+        generatePackage = "${group}.beerxml.model"
+    }
+}
+
+// Add generated JAXB classes to source set.
+project.sourceSets.main.java.srcDirs += [ file(jaxb.xjc.destinationDir) ]
+compileJava.dependsOn 'xjc'
+xjc.dependsOn 'processResources'

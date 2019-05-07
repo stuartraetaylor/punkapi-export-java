@@ -1,0 +1,9 @@
+.gradle
+.project
+.classpath
+
+build/
+bin/
+.settings/
+.vscode/
+beerxml/

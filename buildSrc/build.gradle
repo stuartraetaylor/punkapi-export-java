@@ -1,0 +1,7 @@
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.jsonschema2pojo:jsonschema2pojo-gradle-plugin:1.0.1'
+}
