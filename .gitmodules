@@ -5,7 +5,7 @@
 [submodule "submodules/beerxml"]
     path = submodules/beerxml
     url = https://github.com/stuartraetaylor/BeerXML-Standard.git
-    branch = fix-schema
+    branch = master
 [submodule "submodules/brewerwall-yeasts"]
 	path = submodules/brewerwall-yeasts
 	url = https://github.com/brewerwall/yeasts.git
