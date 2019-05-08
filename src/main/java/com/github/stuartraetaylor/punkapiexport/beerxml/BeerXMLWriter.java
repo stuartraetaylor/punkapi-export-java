@@ -41,8 +41,13 @@ public class BeerXMLWriter implements PunkWriter {
 
 	@Override
 	public void write(Collection<PunkDocument> documents) throws PunkException {
-        for (PunkDocument d : documents)
-            write(d);
+        for (PunkDocument d : documents) {
+            try {
+                write(d);
+            } catch (BeerXMLExportException e) {
+                log.error("Failed to export recipe: {}", d.getName(), e);
+            }
+        }
 	}
 
 	@Override
@@ -63,14 +68,14 @@ public class BeerXMLWriter implements PunkWriter {
 		}
     }
 
-    private RECIPES createRecipes(PunkSchema document) {
+    private RECIPES createRecipes(PunkSchema document) throws BeerXMLExportException {
         RECIPES recipes = new RECIPES();
         RECIPE recipe = createRecipe(document);
         recipes.getRECIPE().add(recipe);
         return recipes;
 	}
 
-	private RECIPE createRecipe(PunkSchema document) {
+	private RECIPE createRecipe(PunkSchema document) throws BeerXMLExportException {
         RECIPE recipe = new RECIPE();
         recipe.setNAME(document.getName());
         recipe.setVERSION(1);
@@ -113,23 +118,23 @@ public class BeerXMLWriter implements PunkWriter {
         recipe.setNOTES(notes);
 	}
 
-	private void createBatchSize(RECIPE recipe, PunkVolume volume) {
+	private void createBatchSize(RECIPE recipe, PunkVolume volume) throws BeerXMLExportException {
         if (!volume.getUnit().equals("liters"))
-            throw new IllegalArgumentException("Unsupported volume unit: " + volume.getUnit());
+            throw new BeerXMLExportException("Unsupported volume unit: " + volume.getUnit());
 
         recipe.setBATCHSIZE(volume.getValue());
         recipe.setDISPLAYBATCHSIZE(volume.getValue() + " L");
     }
 
-    private void createBoilBoilSize(RECIPE recipe, PunkBoilVolume volume) {
+    private void createBoilBoilSize(RECIPE recipe, PunkBoilVolume volume) throws BeerXMLExportException {
         if (!volume.getUnit().equals("liters"))
-            throw new IllegalArgumentException("Unsupported volume unit: " + volume.getUnit());
+            throw new BeerXMLExportException("Unsupported volume unit: " + volume.getUnit());
 
         recipe.setBOILSIZE(volume.getValue());
         recipe.setDISPLAYBOILSIZE(volume.getValue() + " L");
     }
 
-    private void createPrimaryTemp(RECIPE recipe, PunkFermentation fermentation) {
+    private void createPrimaryTemp(RECIPE recipe, PunkFermentation fermentation) throws BeerXMLExportException {
         if (fermentation.getTemp().getValue() == null) {
             log.warn("No fermentation temperature found: {}", recipe.getNAME());
             return;
@@ -139,13 +144,13 @@ public class BeerXMLWriter implements PunkWriter {
         String unit = fermentation.getTemp().getUnit();
 
         if (!unit.equals("celsius"))
-            throw new IllegalArgumentException("Unsupported fermentation temp unit: " + unit);
+            throw new BeerXMLExportException("Unsupported fermentation temp unit: " + unit);
 
         recipe.setPRIMARYTEMP(temp);
         recipe.setDISPLAYPRIMARYTEMP(temp + " C");
     }
 
-    private void createFermentables(FERMENTABLES fermentables, List<PunkMalt> punkMalts) {
+    private void createFermentables(FERMENTABLES fermentables, List<PunkMalt> punkMalts) throws BeerXMLExportException {
         for (PunkMalt malt : punkMalts) {
             FERMENTABLE fermentable = new FERMENTABLE();
             fermentables.getFERMENTABLE().add(fermentable);
@@ -156,7 +161,7 @@ public class BeerXMLWriter implements PunkWriter {
         }
 	}
 
-    private void createFermentableAmount(FERMENTABLE fermentable, PunkAmount amount) {
+    private void createFermentableAmount(FERMENTABLE fermentable, PunkAmount amount) throws BeerXMLExportException {
         switch (amount.getUnit()) {
             case "kilograms":
                 fermentable.setAMOUNT(amount.getValue().doubleValue());
@@ -165,11 +170,11 @@ public class BeerXMLWriter implements PunkWriter {
                 fermentable.setAMOUNT(gramsToKG(amount.getValue()).doubleValue());
                 break;
             default:
-                throw new IllegalArgumentException("Malt amount unit not supported: " + amount.getUnit());
+                throw new BeerXMLExportException("Malt amount unit not supported: " + amount.getUnit());
         }
 	}
 
-    private void createHops(HOPS hops, List<PunkHop> punkHops) {
+    private void createHops(HOPS hops, List<PunkHop> punkHops) throws BeerXMLExportException {
         for (PunkHop punkHop : punkHops) {
             HOP hop = new HOP();
             hops.getHOP().add(hop);
@@ -182,7 +187,7 @@ public class BeerXMLWriter implements PunkWriter {
         }
 	}
 
-    private void createHopAddition(HOP hop, String punkAddition) {
+    private void createHopAddition(HOP hop, String punkAddition) throws BeerXMLExportException {
         try {
             // Absolute time.
             int time = Integer.parseInt(punkAddition);
@@ -200,7 +205,7 @@ public class BeerXMLWriter implements PunkWriter {
         }
     }
 
-    private HopUse translateHopAdd(String hopAdd) {
+    private HopUse translateHopAdd(String hopAdd) throws BeerXMLExportException {
         switch (hopAdd.toLowerCase()) {
             case "first wort":
             case "first wort hops":
@@ -224,7 +229,7 @@ public class BeerXMLWriter implements PunkWriter {
                 if (weirdHopException(hopAdd))
                     return null;
 
-                throw new IllegalArgumentException("Unsupported hop addition: " + hopAdd);
+                throw new BeerXMLExportException("Unsupported hop addition: " + hopAdd);
         }
     }
 
