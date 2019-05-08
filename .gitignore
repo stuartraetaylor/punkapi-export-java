@@ -4,6 +4,7 @@
 
 build/
 bin/
-.settings/
-.vscode/
-beerxml/
+
+/.settings/
+/.vscode/
+/beerxml/
