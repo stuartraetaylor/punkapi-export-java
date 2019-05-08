@@ -1,10 +1,15 @@
 package com.github.stuartraetaylor.punkapiexport.beerxml;
 
+import static java.util.stream.Collectors.*;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -13,12 +18,11 @@ import javax.xml.bind.Marshaller;
 import com.github.stuartraetaylor.punkapiexport.PunkDocument;
 import com.github.stuartraetaylor.punkapiexport.PunkException;
 import com.github.stuartraetaylor.punkapiexport.PunkWriter;
+import com.github.stuartraetaylor.punkapiexport.Yeast;
+import com.github.stuartraetaylor.punkapiexport.YeastReader;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE;
-import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.FERMENTABLES;
-import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.HOPS;
-import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.MASH;
-import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.YEASTS;
+import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.*;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.FERMENTABLES.FERMENTABLE;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.HOPS.HOP;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.MASH.MASHSTEPS;
@@ -38,6 +42,32 @@ public class BeerXMLWriter implements PunkWriter {
     static final int defaultEfficiency = 70;
     static final int defaultMashTime = 60;
     static final int defaultMashTemp = 65;
+
+    private final Map<String, Yeast> yeastStrains;
+
+    public BeerXMLWriter(YeastReader yeastReader) {
+        this.yeastStrains = createYeastIndex(yeastReader);
+
+        if (!baseDir.exists())
+            baseDir.mkdir();
+    }
+
+    private Map<String, Yeast> createYeastIndex(YeastReader yeastReader) {
+        try {
+            List<Yeast> yeastDb = yeastReader.readAll();
+            Map<String, Yeast> yeastStrains =  yeastDb.stream().collect(
+                    toMap(
+                        Yeast::getStrain,
+                        Function.identity(),
+                        (k1, k2) -> k1)); // ignore duplicate strains.
+
+            log.debug("Loaded yeast db: {}", yeastStrains.size());
+            return yeastStrains;
+        } catch (PunkException e) {
+            log.error("Failed to load yeast db", e);
+            return Collections.emptyMap();
+        }
+    }
 
 	@Override
 	public void write(Collection<PunkDocument> documents) throws PunkException {
@@ -258,11 +288,29 @@ public class BeerXMLWriter implements PunkWriter {
 
 	private void createYeasts(YEASTS yeasts, String punkYeast) {
         YEAST yeast = new YEAST();
-        yeast.setNAME(punkYeast);
+        yeast.setAMOUNT(0.1);
         yeasts.setYEAST(yeast);
+
+        Yeast yeastDesc = lookupYeast(punkYeast);
+        if (yeastDesc != null) {
+            yeast.setNAME(yeastDesc.getName());
+            yeast.setFORM(String.valueOf(yeastDesc.getForm()));
+            yeast.setPRODUCTID(yeastDesc.getStrain());
+            yeast.setLABORATORY(yeastDesc.getLaboratory());
+            yeast.setATTENUATION(attenuation(yeastDesc));  // FIXME not an int.
+            yeast.setFLOCCULATION(String.valueOf(yeastDesc.getFlocculation()));
+            yeast.setMINTEMPERATURE((int)yeastDesc.getTemperatureMin()); // FIXME not an int.
+            yeast.setMAXTEMPERATURE(yeastDesc.getTemperatureMax());
+        } else {
+            yeast.setNAME(punkYeast);
+        }
 	}
 
-    private void createMash(MASH mash, PunkMethod method) {
+    private int attenuation(Yeast yeast) {
+        return (int)(yeast.getAttenuationMax() + yeast.getAttenuationMin()) / 2;
+	}
+
+	private void createMash(MASH mash, PunkMethod method) {
         mash.setNAME("Mash");
         mash.setMASHSTEPS(new MASHSTEPS());
 
@@ -287,6 +335,22 @@ public class BeerXMLWriter implements PunkWriter {
 
     private BigDecimal gramsToKG(BigDecimal value) {
 		return value.divide(new BigDecimal(1000.0));
+    }
+
+	private Yeast lookupYeast(String yeastName) {
+        String strain = YeastParser.parse(yeastName);
+        if (strain == null) {
+            log.warn("Could not parse yeast: {}", yeastName);
+            return null;
+        }
+
+        Yeast yeast = yeastStrains.get(strain);
+        if (yeast == null) {
+            log.warn("Unrecognised yeast strain: {}", strain);
+            return null;
+        }
+
+        return yeast;
 	}
 
 	private final Logger log = LogManager.getLogger(this.getClass());

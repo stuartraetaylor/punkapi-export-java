@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.github.stuartraetaylor.punkapiexport.beerxml.*;
 import com.github.stuartraetaylor.punkapiexport.punkapi.*;
+import com.github.stuartraetaylor.punkapiexport.yeasts.YeastsDBReader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +30,7 @@ public class Main {
         PunkReader reader = new PunkDBReader();
         PunkDocument document = reader.read(beerName);
 
-        PunkWriter writer = new BeerXMLWriter();
+        PunkWriter writer = new BeerXMLWriter(new YeastsDBReader());
         writer.write(document);
 	}
 
@@ -39,7 +40,7 @@ public class Main {
 
         log.info("Read: {} docs", documents.size());
 
-        PunkWriter writer = new BeerXMLWriter();
+        PunkWriter writer = new BeerXMLWriter(new YeastsDBReader());
         writer.write(documents);
 	}
 
