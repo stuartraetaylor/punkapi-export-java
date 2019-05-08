@@ -1,5 +1,8 @@
 # PunkAPI Export
 
+[![Build Status](https://travis-ci.com/stuartraetaylor/punkapi-export-java.svg?branch=master)](https://travis-ci.com/stuartraetaylor/punkapi-export-java)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 Exports Brewdog [DIY Dog](https://www.brewdog.com/diydog) recipes from the [PunkAPI](http://punkapi.com) database
 to [BeerXML](http://www.beerxml.com/) format, and maybe other formats eventually.
 
