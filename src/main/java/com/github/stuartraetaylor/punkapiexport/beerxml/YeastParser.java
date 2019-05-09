@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 
 class YeastParser {
 
-    private static final Pattern wyeast     = Pattern.compile(".*Wyeast\\s+([1-9][0-9]{3}).*");
+    private static final Pattern wyeast     = Pattern.compile(".*Wyeast.*?\\s([1-9][0-9]{3}).*");
     private static final Pattern whiteLabs  = Pattern.compile(".*(WLP[0-9]{3,4}).*");
-    private static final Pattern safale     = Pattern.compile(".*(U?S\\-[0-9]{2}).*");
+    private static final Pattern safale     = Pattern.compile(".*?(U?S\\-[0-9]{2}).*");
 
     static String parse(String yeast) {
         if (yeast == null)
