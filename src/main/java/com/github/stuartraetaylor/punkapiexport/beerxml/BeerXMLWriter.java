@@ -277,12 +277,17 @@ public class BeerXMLWriter implements PunkWriter {
     }
 
 	private void createAmount(HOP hop, PunkAmount__1 amount) {
-        if (!amount.getUnit().equals("grams")) {
+        if (!(amount.getUnit().equals("grams") || amount.getUnit().equals("kilogram"))) {
             log.warn("Skipping; unsuported hop unit: " + amount.getUnit());
             return;
         }
 
-        BigDecimal kgAmount = gramsToKG(amount.getValue());
+        BigDecimal kgAmount;
+        if (amount.getUnit().equals("grams"))
+            kgAmount = gramsToKG(amount.getValue());
+        else
+            kgAmount = amount.getValue();
+
         hop.setAMOUNT(kgAmount.doubleValue());
 	}
 
