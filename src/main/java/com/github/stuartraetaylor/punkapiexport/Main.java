@@ -17,10 +17,10 @@ public class Main {
     public static void main(String[] args) {
         Options options = new Options()
                 .addOption(new Option("a", "all", false, "Export all recipes"))
-                .addOption(new Option("b", "beer", true, "Export a single recipe"));
-                //.addOption(new Option("y", "list-yeasts", true, "Lists all yeasts"))
-                //.addOption(new Option("g", "list-grains", true, "List all grains"))
-                //.addOption(new Option("h", "list-hops", true, "List all hops"));
+                .addOption(new Option("b", "beer", true, "Export a single recipe"))
+                .addOption(new Option("y", "list-yeasts", false, "Lists all yeasts"))
+                .addOption(new Option("m", "list-malts", false, "List all malts"))
+                .addOption(new Option("h", "list-hops", false, "List all hops"));
 
         HelpFormatter formatter = new HelpFormatter();
 
@@ -37,11 +37,11 @@ public class Main {
             } else if (cmd.hasOption("beer")) {
                 exportSingle(cmd.getOptionValue("beer"), reader);
             } else if (cmd.hasOption("list-yeasts")) {
-                //listYeasts(reader);
-            } else if (cmd.hasOption("list-grains")) {
-                //listGrains(reader);
+                listYeasts(reader);
+            } else if (cmd.hasOption("list-malts")) {
+                listMalts(reader);
             } else if (cmd.hasOption("list-hops")) {
-                //listHops(reader);
+                listHops(reader);
             } else {
                 exportAll(reader);
             }
@@ -60,7 +60,7 @@ public class Main {
 		}
     }
 
-    static void exportSingle(String beerName, PunkReader reader) throws PunkException {
+	static void exportSingle(String beerName, PunkReader reader) throws PunkException {
         PunkDocument document = reader.read(beerName);
         log.info("Read beer: {}", document.getName());
 
@@ -69,18 +69,42 @@ public class Main {
 	}
 
     static void exportAll(PunkReader reader) throws PunkException {
-        List<PunkDocument> documents = reader.readAll();
-        log.info("Read: {} docs", documents.size());
+        List<PunkDocument> documents = readAll(reader);
 
         PunkWriter writer = new BeerXMLWriter(new YeastsDBReader());
         writer.write(documents);
     }
 
+    static void listYeasts(PunkReader reader) throws PunkException {
+        PunkStats stats = new PunkDBStats(System.out);
+
+        List<PunkDocument> documents = readAll(reader);
+        stats.yeasts(documents);
+	}
+
+    static void listMalts(PunkReader reader) throws PunkException {
+        PunkStats stats = new PunkDBStats(System.out);
+
+        List<PunkDocument> documents = readAll(reader);
+        stats.malts(documents);
+	}
+
+    static void listHops(PunkReader reader) throws PunkException {
+        PunkStats stats = new PunkDBStats(System.out);
+
+        List<PunkDocument> documents = readAll(reader);
+        stats.hops(documents);
+    }
+
+    static List<PunkDocument> readAll(PunkReader reader) throws PunkException {
+        List<PunkDocument> documents = reader.readAll();
+        log.info("Read: {} docs", documents.size());
+        return documents;
+    }
+
     static Properties loadVersionInfo() throws IOException {
         Properties versionInfo = new Properties();
-        versionInfo.load(
-            Main.class.getResourceAsStream("/version-info.properties")
-        );
+        versionInfo.load(Main.class.getResourceAsStream("/version-info.properties"));
         return versionInfo;
     }
 
