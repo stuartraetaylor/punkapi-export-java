@@ -55,11 +55,8 @@ public class BeerXMLWriter implements PunkWriter {
     private Map<String, Yeast> createYeastIndex(YeastReader yeastReader) {
         try {
             List<Yeast> yeastDb = yeastReader.readAll();
-            Map<String, Yeast> yeastStrains =  yeastDb.stream().collect(
-                    toMap(
-                        Yeast::getStrain,
-                        Function.identity(),
-                        (k1, k2) -> k1)); // ignore duplicate strains.
+            Map<String, Yeast> yeastStrains = yeastDb.stream()
+                    .collect(toMap(Yeast::getStrain, Function.identity(), (k1, k2) -> k1)); // ignore duplicate strains.
 
             log.debug("Loaded yeast db: {}", yeastStrains.size());
             return yeastStrains;
@@ -69,19 +66,26 @@ public class BeerXMLWriter implements PunkWriter {
         }
     }
 
-	@Override
-	public void write(Collection<PunkDocument> documents) throws PunkException {
+    @Override
+    public void write(Collection<PunkDocument> documents) throws PunkException {
+        logInfoMessage();
+
         for (PunkDocument d : documents) {
             try {
-                write(d);
+                writeDocument(d);
             } catch (BeerXMLExportException e) {
                 log.error("Failed to export recipe: {}", d.getName(), e);
             }
         }
-	}
+    }
 
-	@Override
+    @Override
     public void write(PunkDocument document) throws PunkException {
+        logInfoMessage();
+        writeDocument(document);
+    }
+
+	public void writeDocument(PunkDocument document) throws PunkException {
         try {
             log.debug("Exporting recipe: {}", document.getName());
             RECIPES beerxml = createRecipes(document.getDocument());
@@ -93,9 +97,9 @@ public class BeerXMLWriter implements PunkWriter {
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(beerxml, beerFile);
-		} catch (JAXBException e) {
+        } catch (JAXBException e) {
             throw new PunkException("Failed to export recipe: " + document.getName(), e);
-		}
+        }
     }
 
     private RECIPES createRecipes(PunkSchema document) throws BeerXMLExportException {
@@ -103,9 +107,9 @@ public class BeerXMLWriter implements PunkWriter {
         RECIPE recipe = createRecipe(document);
         recipes.getRECIPE().add(recipe);
         return recipes;
-	}
+    }
 
-	private RECIPE createRecipe(PunkSchema document) throws BeerXMLExportException {
+    private RECIPE createRecipe(PunkSchema document) throws BeerXMLExportException {
         RECIPE recipe = new RECIPE();
         recipe.setNAME(document.getName());
         recipe.setVERSION(1);
@@ -132,9 +136,9 @@ public class BeerXMLWriter implements PunkWriter {
         createMash(recipe.getMASH(), document.getMethod());
 
         return recipe;
-	}
+    }
 
-	private void createNotes(RECIPE recipe, PunkSchema document) {
+    private void createNotes(RECIPE recipe, PunkSchema document) {
         String notes = ""; // FIXME CDATA.
         notes += "Brewdog " + document.getName() + "\n\n";
         notes += "Tagline: " + document.getTagline() + "\n";
@@ -146,9 +150,9 @@ public class BeerXMLWriter implements PunkWriter {
         notes += "PunkAPI id: " + document.getId() + "\n";
 
         recipe.setNOTES(notes);
-	}
+    }
 
-	private void createBatchSize(RECIPE recipe, PunkVolume volume) throws BeerXMLExportException {
+    private void createBatchSize(RECIPE recipe, PunkVolume volume) throws BeerXMLExportException {
         if (!volume.getUnit().equals("liters"))
             throw new BeerXMLExportException("Unsupported volume unit: " + volume.getUnit());
 
@@ -189,20 +193,20 @@ public class BeerXMLWriter implements PunkWriter {
             fermentable.setTYPE("Grain");
             createFermentableAmount(fermentable, malt.getAmount());
         }
-	}
+    }
 
     private void createFermentableAmount(FERMENTABLE fermentable, PunkAmount amount) throws BeerXMLExportException {
         switch (amount.getUnit()) {
-            case "kilograms":
-                fermentable.setAMOUNT(amount.getValue().doubleValue());
-                break;
-            case "grams":
-                fermentable.setAMOUNT(gramsToKG(amount.getValue()).doubleValue());
-                break;
-            default:
-                throw new BeerXMLExportException("Malt amount unit not supported: " + amount.getUnit());
+        case "kilograms":
+            fermentable.setAMOUNT(amount.getValue().doubleValue());
+            break;
+        case "grams":
+            fermentable.setAMOUNT(gramsToKG(amount.getValue()).doubleValue());
+            break;
+        default:
+            throw new BeerXMLExportException("Malt amount unit not supported: " + amount.getUnit());
         }
-	}
+    }
 
     private void createHops(HOPS hops, List<PunkHop> punkHops) throws BeerXMLExportException {
         for (PunkHop punkHop : punkHops) {
@@ -215,7 +219,7 @@ public class BeerXMLWriter implements PunkWriter {
             createHopAddition(hop, punkHop.getAdd());
             createAmount(hop, punkHop.getAmount());
         }
-	}
+    }
 
     private void createHopAddition(HOP hop, String punkAddition) throws BeerXMLExportException {
         try {
@@ -237,46 +241,46 @@ public class BeerXMLWriter implements PunkWriter {
 
     private HopUse translateHopAdd(String hopAdd) throws BeerXMLExportException {
         switch (hopAdd.toLowerCase()) {
-            case "first wort":
-            case "first wort hops":
-                return HopUse.FIRST_WORT;
-            case "start":
-                return HopUse.START;
-            case "middle":
-            case "kettle":
-                return HopUse.MIDDLE;
-            case "end":
-            case "flame out":
-            case "additions":
-                return HopUse.END;
-            case "whirlpool":
-                return HopUse.WHIRLPOOL;
-            case "dry hop":
-            case "fv":
-            case "fv addition":
-                return HopUse.DRY_HOP;
-            default:
-                if (weirdHopException(hopAdd))
-                    return null;
+        case "first wort":
+        case "first wort hops":
+            return HopUse.FIRST_WORT;
+        case "start":
+            return HopUse.START;
+        case "middle":
+        case "kettle":
+            return HopUse.MIDDLE;
+        case "end":
+        case "flame out":
+        case "additions":
+            return HopUse.END;
+        case "whirlpool":
+            return HopUse.WHIRLPOOL;
+        case "dry hop":
+        case "fv":
+        case "fv addition":
+            return HopUse.DRY_HOP;
+        default:
+            if (weirdHopException(hopAdd))
+                return null;
 
-                throw new BeerXMLExportException("Unsupported hop addition: " + hopAdd);
+            throw new BeerXMLExportException("Unsupported hop addition: " + hopAdd);
         }
     }
 
     private boolean weirdHopException(String hopAdd) {
         // FIXME these aren't really hop additions.
         switch (hopAdd) {
-            case "Wood Ageing":
-            case "Mash":
-            case "secondary":
-            case "maturation":
-                return true;
-            default:
-                return false;
+        case "Wood Ageing":
+        case "Mash":
+        case "secondary":
+        case "maturation":
+            return true;
+        default:
+            return false;
         }
     }
 
-	private void createAmount(HOP hop, PunkAmount__1 amount) {
+    private void createAmount(HOP hop, PunkAmount__1 amount) {
         if (!(amount.getUnit().equals("grams") || amount.getUnit().equals("kilogram"))) {
             log.warn("Skipping; unsuported hop unit: " + amount.getUnit());
             return;
@@ -289,9 +293,9 @@ public class BeerXMLWriter implements PunkWriter {
             kgAmount = amount.getValue();
 
         hop.setAMOUNT(kgAmount.doubleValue());
-	}
+    }
 
-	private void createYeasts(YEASTS yeasts, String punkYeast) {
+    private void createYeasts(YEASTS yeasts, String punkYeast) {
         YEAST yeast = new YEAST();
         yeast.setAMOUNT(0.1);
         yeasts.setYEAST(yeast);
@@ -302,20 +306,20 @@ public class BeerXMLWriter implements PunkWriter {
             yeast.setFORM(String.valueOf(yeastDesc.getForm()));
             yeast.setPRODUCTID(yeastDesc.getStrain());
             yeast.setLABORATORY(yeastDesc.getLaboratory());
-            yeast.setATTENUATION(attenuation(yeastDesc));  // FIXME not an int.
+            yeast.setATTENUATION(attenuation(yeastDesc)); // FIXME not an int.
             yeast.setFLOCCULATION(String.valueOf(yeastDesc.getFlocculation()));
-            yeast.setMINTEMPERATURE((int)yeastDesc.getTemperatureMin()); // FIXME not an int.
+            yeast.setMINTEMPERATURE((int) yeastDesc.getTemperatureMin()); // FIXME not an int.
             yeast.setMAXTEMPERATURE(yeastDesc.getTemperatureMax());
         } else {
             yeast.setNAME(punkYeast);
         }
-	}
+    }
 
     private int attenuation(Yeast yeast) {
-        return (int)(yeast.getAttenuationMax() + yeast.getAttenuationMin()) / 2;
-	}
+        return (int) (yeast.getAttenuationMax() + yeast.getAttenuationMin()) / 2;
+    }
 
-	private void createMash(MASH mash, PunkMethod method) {
+    private void createMash(MASH mash, PunkMethod method) {
         mash.setNAME("Mash");
         mash.setMASHSTEPS(new MASHSTEPS());
 
@@ -339,10 +343,10 @@ public class BeerXMLWriter implements PunkWriter {
     }
 
     private BigDecimal gramsToKG(BigDecimal value) {
-		return value.divide(new BigDecimal(1000.0));
+        return value.divide(new BigDecimal(1000.0));
     }
 
-	private Yeast lookupYeast(String yeastName) {
+    private Yeast lookupYeast(String yeastName) {
         String strain = YeastParser.parse(yeastName);
         if (strain == null) {
             log.warn("Could not parse yeast: {}", yeastName);
@@ -356,8 +360,12 @@ public class BeerXMLWriter implements PunkWriter {
         }
 
         return yeast;
+    }
+
+    private void logInfoMessage() {
+        log.info("Exporting recipe(s) to: {}", baseDir.getAbsolutePath());
 	}
 
-	private final Logger log = LogManager.getLogger(this.getClass());
+    private final Logger log = LogManager.getLogger(this.getClass());
 
 }

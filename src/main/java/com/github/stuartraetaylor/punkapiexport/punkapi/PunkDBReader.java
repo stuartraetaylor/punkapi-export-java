@@ -25,6 +25,10 @@ public class PunkDBReader implements PunkReader {
     public PunkDocument read(String beerName) throws PunkException {
         String formattedName = formatBeerName(beerName);
         File beerFile = new File(baseDir, formattedName + ".json");
+
+        if (!beerFile.exists())
+            throw new PunkDBFileException("File not found: " + beerFile.getAbsolutePath());
+
         PunkSchema document = readFile(beerFile);
         return new PunkDocument(formattedName, document);
     }
