@@ -68,7 +68,7 @@ jsonSchema2Pojo {
 }
 
 jaxb {
-    xsdDir = "${project.projectDir}/submodules/beerxml/historical/BeerXML v1/"
+    xsdDir = "${project.projectDir}/submodules/beerxml-schema/historical/BeerXML v1/"
     xjc {
         generatePackage = "${group}.beerxml.model"
     }

@@ -2,8 +2,8 @@
     path = submodules/punkapi-db
     url = https://github.com/stuartraetaylor/punkapi-db
     branch = fix-recipes
-[submodule "submodules/beerxml"]
-    path = submodules/beerxml
+[submodule "submodules/beerxml-schema"]
+    path = submodules/beerxml-schema
     url = https://github.com/stuartraetaylor/BeerXML-Standard.git
     branch = master
 [submodule "submodules/brewerwall-yeasts"]
