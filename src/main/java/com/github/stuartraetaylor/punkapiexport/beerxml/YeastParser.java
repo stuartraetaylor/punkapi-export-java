@@ -3,22 +3,25 @@ package com.github.stuartraetaylor.punkapiexport.beerxml;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.stuartraetaylor.punkapiexport.reference.Yeast;
+
 class YeastParser {
 
-    private static final Pattern wyeast     = Pattern.compile(".*Wyeast.*?\\s([1-9][0-9]{3}).*");
-    private static final Pattern whiteLabs  = Pattern.compile(".*(WLP[0-9]{3,4}).*");
-    private static final Pattern safale     = Pattern.compile(".*?(U?S\\-[0-9]{2}).*");
+    private static final Pattern wyeast     = Pattern.compile(".*wyeast.*?\\s([1-9][0-9]{3}).*");
+    private static final Pattern whiteLabs  = Pattern.compile(".*(wlp[0-9]{3,4}).*");
+    private static final Pattern safale     = Pattern.compile(".*?(u?s\\-[0-9]{2}).*");
 
     static String parse(String yeast) {
-        if (yeast == null)
+        String identifier = Yeast.normalise(yeast);
+        if (identifier == null)
             return null;
 
         String strain;
-        if ((strain = parse(yeast, wyeast)) != null)
+        if ((strain = parse(identifier, wyeast)) != null)
             return strain;
-        if ((strain = parse(yeast, whiteLabs)) != null)
+        if ((strain = parse(identifier, whiteLabs)) != null)
             return strain;
-        if ((strain = parse(yeast, safale)) != null)
+        if ((strain = parse(identifier, safale)) != null)
             return strain;
 
         return null;

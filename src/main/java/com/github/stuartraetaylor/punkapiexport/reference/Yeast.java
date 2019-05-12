@@ -1,10 +1,10 @@
-package com.github.stuartraetaylor.punkapiexport;
+package com.github.stuartraetaylor.punkapiexport.reference;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class Yeast {
+public class Yeast implements ReferenceEntity {
 
     @JsonProperty("id")
     private int id;
@@ -41,70 +41,6 @@ public class Yeast {
 
     @JsonProperty("tolerance")
     private double tolerance;
-
-    public static enum Flocculation {
-        LOW("Low"),
-        MEDIUM("Medium"),
-        HIGH("High");
-
-        private final String text;
-
-        Flocculation(String text) {
-            this.text = text;
-        }
-
-        @JsonCreator
-        public static Flocculation parse(String value) {
-            String enumValue = value.replaceAll("\\s+", "_").toUpperCase();
-            if (enumValue.equals("N/A"))
-                return null;
-
-            try {
-                return valueOf(enumValue);
-            } catch (IllegalArgumentException e) { // alises..
-                switch (enumValue) {
-                    case "POWDERY":
-                    case "LOW_TO_MEDIUM":
-                        return LOW;
-                    case "MEDIUM_TO_LOW":
-                    case "MEDIUM_TO_HIGH":
-                        return MEDIUM;
-                    case "VERY_HIGH":
-                        return HIGH;
-                }
-            }
-
-            return null;
-        }
-
-        @JsonValue
-        @Override
-        public String toString() {
-            return text;
-        }
-    }
-
-    public static enum Form {
-        LIQUID("Liquid"),
-        DRY("Dry");
-
-        private final String text;
-
-        Form(String text) {
-            this.text = text;
-        }
-
-        @JsonCreator
-        public static Form parse(String value) {
-            return valueOf(value.toUpperCase());
-        }
-
-        @JsonValue
-        @Override
-        public String toString() {
-            return text;
-        }
-    }
 
 	public int getId() {
 		return id;
@@ -201,5 +137,81 @@ public class Yeast {
 	public void setTolerance(double tolerance) {
 		this.tolerance = tolerance;
 	}
+
+    public static enum Flocculation {
+        LOW("Low"),
+        MEDIUM("Medium"),
+        HIGH("High");
+
+        private final String text;
+
+        Flocculation(String text) {
+            this.text = text;
+        }
+
+        @JsonCreator
+        public static Flocculation parse(String value) {
+            String enumValue = value.replaceAll("\\s+", "_").toUpperCase();
+            if (enumValue.equals("N/A"))
+                return null;
+
+            try {
+                return valueOf(enumValue);
+            } catch (IllegalArgumentException e) { // alises..
+                switch (enumValue) {
+                    case "POWDERY":
+                    case "LOW_TO_MEDIUM":
+                        return LOW;
+                    case "MEDIUM_TO_LOW":
+                    case "MEDIUM_TO_HIGH":
+                        return MEDIUM;
+                    case "VERY_HIGH":
+                        return HIGH;
+                }
+            }
+
+            return null;
+        }
+
+        @JsonValue
+        @Override
+        public String toString() {
+            return text;
+        }
+    }
+
+    public static enum Form {
+        LIQUID("Liquid"),
+        DRY("Dry");
+
+        private final String text;
+
+        Form(String text) {
+            this.text = text;
+        }
+
+        @JsonCreator
+        public static Form parse(String value) {
+            return valueOf(value.toUpperCase());
+        }
+
+        @JsonValue
+        @Override
+        public String toString() {
+            return text;
+        }
+    }
+
+    @Override
+    public String identifier() {
+        return normalise(strain);
+    }
+
+    public static String normalise(String identifier) {
+        if (identifier == null)
+            return null;
+
+        return identifier.toLowerCase().trim();
+    }
 
 }

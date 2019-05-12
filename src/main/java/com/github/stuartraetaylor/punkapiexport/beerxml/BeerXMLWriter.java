@@ -4,22 +4,17 @@ import static java.util.stream.Collectors.*;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import com.github.stuartraetaylor.punkapiexport.PunkDocument;
-import com.github.stuartraetaylor.punkapiexport.PunkException;
-import com.github.stuartraetaylor.punkapiexport.PunkWriter;
-import com.github.stuartraetaylor.punkapiexport.Yeast;
-import com.github.stuartraetaylor.punkapiexport.YeastReader;
+import com.github.stuartraetaylor.punkapiexport.*;
+import com.github.stuartraetaylor.punkapiexport.reference.*;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE;
 import com.github.stuartraetaylor.punkapiexport.beerxml.model.RECIPES.RECIPE.*;
@@ -43,33 +38,22 @@ public class BeerXMLWriter implements PunkWriter {
     static final int defaultMashTime = 60;
     static final int defaultMashTemp = 65;
 
-    private final Map<String, Yeast> yeastStrains;
+    private final Map<String, Yeast> yeastLookup;
+    private final Map<String, Hop> hopLookup;
 
-    public BeerXMLWriter(YeastReader yeastReader) {
-        this.yeastStrains = createYeastIndex(yeastReader);
+    private final Set<String> warnedRecipeItems = new HashSet<>();
+
+    public BeerXMLWriter(Reader<Yeast> yeastReader, Reader<Hop> hopReader) {
+        this.yeastLookup = createLookup(yeastReader);
+        this.hopLookup = createLookup(hopReader);
 
         if (!baseDir.exists())
             baseDir.mkdir();
     }
 
-    private Map<String, Yeast> createYeastIndex(YeastReader yeastReader) {
-        try {
-            List<Yeast> yeastDb = yeastReader.readAll();
-            Map<String, Yeast> yeastStrains = yeastDb.stream()
-                    .collect(toMap(Yeast::getStrain, Function.identity(), (k1, k2) -> k1)); // ignore duplicate strains.
-
-            log.debug("Loaded yeast db: {}", yeastStrains.size());
-            return yeastStrains;
-        } catch (PunkException e) {
-            log.error("Failed to load yeast db", e);
-            return Collections.emptyMap();
-        }
-    }
-
     @Override
     public void write(Collection<PunkDocument> documents) throws PunkException {
-        logInfoMessage();
-
+        init();
         for (PunkDocument d : documents) {
             try {
                 writeDocument(d);
@@ -77,11 +61,14 @@ public class BeerXMLWriter implements PunkWriter {
                 log.error("Failed to export recipe: {}", d.getName(), e);
             }
         }
+
+        if (!warnedRecipeItems.isEmpty())
+            log.warn("Warned recipe items: {}", warnedRecipeItems.size());
     }
 
     @Override
     public void write(PunkDocument document) throws PunkException {
-        logInfoMessage();
+        init();
         writeDocument(document);
     }
 
@@ -125,6 +112,7 @@ public class BeerXMLWriter implements PunkWriter {
         recipe.setHOPS(new HOPS());
         recipe.setYEASTS(new YEASTS());
         recipe.setMASH(new MASH());
+        recipe.setSTYLE(new STYLE());
 
         createNotes(recipe, document);
         createBatchSize(recipe, document.getVolume());
@@ -134,6 +122,7 @@ public class BeerXMLWriter implements PunkWriter {
         createHops(recipe.getHOPS(), document.getIngredients().getHops());
         createYeasts(recipe.getYEASTS(), document.getIngredients().getYeast());
         createMash(recipe.getMASH(), document.getMethod());
+        //createStyle(recipe.getSTYLE(), document);
 
         return recipe;
     }
@@ -212,9 +201,16 @@ public class BeerXMLWriter implements PunkWriter {
         for (PunkHop punkHop : punkHops) {
             HOP hop = new HOP();
             hops.getHOP().add(hop);
-
-            hop.setNAME(punkHop.getName());
             hop.setFORM("pellet");
+
+            String punkHopName = punkHop.getName();
+            Hop hopDesc = lookupHop(punkHopName);
+            if (hopDesc != null) {
+                hop.setNAME(hopDesc.getName());
+                hop.setALPHA(alpha(hopDesc));
+            } else {
+                hop.setNAME(punkHopName);
+            }
 
             createHopAddition(hop, punkHop.getAdd());
             createAmount(hop, punkHop.getAmount());
@@ -241,29 +237,29 @@ public class BeerXMLWriter implements PunkWriter {
 
     private HopUse translateHopAdd(String hopAdd) throws BeerXMLExportException {
         switch (hopAdd.toLowerCase()) {
-        case "first wort":
-        case "first wort hops":
-            return HopUse.FIRST_WORT;
-        case "start":
-            return HopUse.START;
-        case "middle":
-        case "kettle":
-            return HopUse.MIDDLE;
-        case "end":
-        case "flame out":
-        case "additions":
-            return HopUse.END;
-        case "whirlpool":
-            return HopUse.WHIRLPOOL;
-        case "dry hop":
-        case "fv":
-        case "fv addition":
-            return HopUse.DRY_HOP;
-        default:
-            if (weirdHopException(hopAdd))
-                return null;
+            case "first wort":
+            case "first wort hops":
+                return HopUse.FIRST_WORT;
+            case "start":
+                return HopUse.START;
+            case "middle":
+            case "kettle":
+                return HopUse.MIDDLE;
+            case "end":
+            case "flame out":
+            case "additions":
+                return HopUse.END;
+            case "whirlpool":
+                return HopUse.WHIRLPOOL;
+            case "dry hop":
+            case "fv":
+            case "fv addition":
+                return HopUse.DRY_HOP;
+            default:
+                if (weirdHopException(hopAdd))
+                    return null;
 
-            throw new BeerXMLExportException("Unsupported hop addition: " + hopAdd);
+                throw new BeerXMLExportException("Unsupported hop addition: " + hopAdd);
         }
     }
 
@@ -319,6 +315,13 @@ public class BeerXMLWriter implements PunkWriter {
         return (int) (yeast.getAttenuationMax() + yeast.getAttenuationMin()) / 2;
     }
 
+    private double alpha(Hop hop) {
+        return BigDecimal.valueOf(hop.getAlphaMin() + hop.getAlphaMax())
+                .divide(BigDecimal.valueOf(2))
+                .round(new MathContext(2))
+                .doubleValue();
+    }
+
     private void createMash(MASH mash, PunkMethod method) {
         mash.setNAME("Mash");
         mash.setMASHSTEPS(new MASHSTEPS());
@@ -349,22 +352,66 @@ public class BeerXMLWriter implements PunkWriter {
     private Yeast lookupYeast(String yeastName) {
         String strain = YeastParser.parse(yeastName);
         if (strain == null) {
-            log.warn("Could not parse yeast: {}", yeastName);
+            logRecipeWarning("Could not parse yeast: {}", yeastName);
             return null;
         }
 
-        Yeast yeast = yeastStrains.get(strain);
+        Yeast yeast = yeastLookup.get(strain);
         if (yeast == null) {
-            log.warn("Unrecognised yeast strain: {}", strain);
+            logRecipeWarning("Unrecognised yeast strain: {}", strain);
             return null;
         }
 
         return yeast;
     }
 
-    private void logInfoMessage() {
+    private Hop lookupHop(String hopName) {
+        String identifier = Hop.normalise(hopName);
+        if (identifier == null) {
+            log.warn("Null hop name: {}", hopName);
+            return null;
+        }
+
+        Hop hop = hopLookup.get(identifier);
+        if (hop == null) {
+            logRecipeWarning("Unrecognised hop: {}", hopName);
+            return null;
+        }
+
+        return hop;
+    }
+
+    private <T extends ReferenceEntity> Map<String, T> createLookup(Reader<T> reader) {
+        try {
+            List<T> records = reader.readAll();
+            Map<String, T> lookup = records.stream()
+                    .collect(toMap(
+                            ReferenceEntity::identifier,
+                            Function.identity(),
+                            (k1, k2) -> k1) // ignore duplicate items.
+                        );
+            log.debug("Loaded JSON DB: {}", lookup.size());
+            return lookup;
+        } catch (PunkException e) {
+            log.error("Failed to load JSON DB", e);
+            return Collections.emptyMap();
+        }
+    }
+
+    private void init() {
         log.info("Exporting recipe(s) to: {}", baseDir.getAbsolutePath());
-	}
+        warnedRecipeItems.clear();
+    }
+
+    private void logRecipeWarning(String message, String item) {
+        if (!log.isWarnEnabled())
+            return;
+
+        if (!warnedRecipeItems.contains(item)) {
+            log.warn(message, item);
+            warnedRecipeItems.add(item);
+        }
+    }
 
     private final Logger log = LogManager.getLogger(this.getClass());
 

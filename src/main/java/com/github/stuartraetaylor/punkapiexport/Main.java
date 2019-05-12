@@ -5,7 +5,7 @@ import java.util.*;
 
 import com.github.stuartraetaylor.punkapiexport.beerxml.*;
 import com.github.stuartraetaylor.punkapiexport.punkapi.*;
-import com.github.stuartraetaylor.punkapiexport.yeasts.YeastsDBReader;
+import com.github.stuartraetaylor.punkapiexport.reference.*;
 
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.*;
@@ -64,14 +64,14 @@ public class Main {
         PunkDocument document = reader.read(beerName);
         log.info("Read beer: {}", document.getName());
 
-        PunkWriter writer = new BeerXMLWriter(new YeastsDBReader());
+        PunkWriter writer = new BeerXMLWriter(new YeastDBReader(), new HopDBReader());
         writer.write(document);
 	}
 
     static void exportAll(PunkReader reader) throws PunkException {
         List<PunkDocument> documents = readAll(reader);
 
-        PunkWriter writer = new BeerXMLWriter(new YeastsDBReader());
+        PunkWriter writer = new BeerXMLWriter(new YeastDBReader(), new HopDBReader());
         writer.write(documents);
     }
 

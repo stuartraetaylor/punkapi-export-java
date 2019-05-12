@@ -2,8 +2,8 @@ package com.github.stuartraetaylor.punkapiexport;
 
 import java.util.List;
 
-public interface YeastReader {
+public interface Reader<T> {
 
-    List<Yeast> readAll() throws PunkException;
+    List<T> readAll() throws PunkException;
 
 }
