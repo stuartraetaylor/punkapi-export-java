@@ -90,6 +90,8 @@ public class PunkDBStats implements PunkStats {
         for (ItemCount item : sorted) {
             out.printf("%3d   %s%n", item.getCount(), item.getName());
         }
+
+        out.printf("%nUnique items: %s%n", sorted.size());
     }
 
     static class ItemCount {
