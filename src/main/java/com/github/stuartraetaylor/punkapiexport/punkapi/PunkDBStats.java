@@ -87,11 +87,15 @@ public class PunkDBStats implements PunkStats {
                     .thenComparing(ItemCount::getName)
             ).collect(toList());
 
+        int total = 0;
         for (ItemCount item : sorted) {
             out.printf("%3d   %s%n", item.getCount(), item.getName());
+            total += item.getCount();
         }
+        out.println();
 
-        out.printf("%nUnique items: %s%n", sorted.size());
+        log.info("Total items: {}", total);
+        log.info("Unique items: {}", sorted.size());
     }
 
     static class ItemCount {
