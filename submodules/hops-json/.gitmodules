@@ -1,4 +1,0 @@
-[submodule "submodules/sboulema-hops"]
-	path = submodules/sboulema-hops
-	url = https://github.com/sboulema/Hops.git
-	branch = master

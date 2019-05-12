@@ -10,8 +10,8 @@
     path = submodules/brewerwall-yeasts
     url = https://github.com/brewerwall/yeasts.git
     branch = master
-[submodule "hops-json"]
-    path = submodules/hops-json
-    url = https://github.com/stuartraetaylor/hops-json.git
-    branch = master
-    shallow = true
+[submodule "submodules/hops-json"]
+	path = submodules/hops-json
+	url = https://github.com/stuartraetaylor/hops-json.git
+	branch = master
+	shallow = true
