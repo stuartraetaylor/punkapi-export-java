@@ -1,4 +1,18 @@
 language: java
 jdk: openjdk8
-script:
-  - ./gradlew run
+git:
+  submodules: true
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+script: >-
+  ./gradlew run &&
+  ./gradlew run --args='--all' &&
+  ./gradlew run --args='--beer punk10' &&
+  ./gradlew run --args='--list-yeasts' &&
+  ./gradlew run --args='--list-malts' &&
+  ./gradlew run --args='--list-hops'
