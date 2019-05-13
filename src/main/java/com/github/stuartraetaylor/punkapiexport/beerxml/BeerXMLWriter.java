@@ -34,7 +34,7 @@ public class BeerXMLWriter implements PunkWriter {
 
     // FIXME check these values.
     static final int defaultBoilTime = 60;
-    static final int defaultEfficiency = 70;
+    static final int defaultEfficiency = 75;
     static final int defaultMashTime = 60;
     static final int defaultMashTemp = 65;
 
@@ -77,7 +77,7 @@ public class BeerXMLWriter implements PunkWriter {
             log.debug("Exporting recipe: {}", document.getName());
             RECIPES beerxml = createRecipes(document.getDocument());
 
-            File beerFile = new File(baseDir, document.getName() + "_beerxml.xml");
+            File beerFile = new File(baseDir, document.getName() + ".xml");
             log.debug("Writing BeerXML recipe: {}", beerFile.getAbsolutePath());
 
             JAXBContext jaxbContext = JAXBContext.newInstance(RECIPES.class);
@@ -122,12 +122,12 @@ public class BeerXMLWriter implements PunkWriter {
         createHops(recipe.getHOPS(), document.getIngredients().getHops());
         createYeasts(recipe.getYEASTS(), document.getIngredients().getYeast());
         createMash(recipe.getMASH(), document.getMethod());
-        //createStyle(recipe.getSTYLE(), document);
+        createStyle(recipe.getSTYLE(), document);
 
         return recipe;
     }
 
-    private void createNotes(RECIPE recipe, PunkSchema document) {
+ 	private void createNotes(RECIPE recipe, PunkSchema document) {
         String notes = ""; // FIXME CDATA.
         notes += "Brewdog " + document.getName() + "\n\n";
         notes += "Tagline: " + document.getTagline() + "\n";
@@ -343,6 +343,21 @@ public class BeerXMLWriter implements PunkWriter {
 
             step.setTYPE("Infusion");
         }
+    }
+
+    private void createStyle(STYLE style, PunkSchema document) {
+        style.setNAME("Generic Ale Profile");
+        style.setTYPE("Ale");
+        style.setOGMIN(1.022);
+        style.setOGMAX(1.092);
+        style.setFGMIN(1.006);
+        style.setFGMAX(1.024);
+        style.setABVMIN(2.8);
+        style.setABVMAX(9.8);
+        style.setCOLORMIN(2);
+        style.setCOLORMAX(22);
+        style.setIBUMIN(18);
+        style.setIBUMAX(88);
     }
 
     private BigDecimal gramsToKG(BigDecimal value) {

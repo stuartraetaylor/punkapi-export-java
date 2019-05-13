@@ -18,7 +18,7 @@ public class Main {
         Options options = new Options()
                 .addOption(new Option("a", "all", false, "Export all recipes"))
                 .addOption(new Option("b", "beer", true, "Export a single recipe"))
-                .addOption(new Option("y", "list-yeasts", false, "Lists all yeasts"))
+                .addOption(new Option("y", "list-yeasts", false, "List all yeasts"))
                 .addOption(new Option("m", "list-malts", false, "List all malts"))
                 .addOption(new Option("h", "list-hops", false, "List all hops"));
 

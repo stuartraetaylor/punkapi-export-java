@@ -30,7 +30,7 @@ dependencies {
     jaxb 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 }
 
-defaultTasks 'run'
+defaultTasks 'build'
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
