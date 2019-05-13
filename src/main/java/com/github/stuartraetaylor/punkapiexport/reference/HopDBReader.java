@@ -10,7 +10,7 @@ public class HopDBReader extends JsonDBReader<Hop> {
     private static final File baseDir = Paths.get("submodules/hops-json").toAbsolutePath().toFile();
 
     public HopDBReader() {
-        super(baseDir, "hops.json", Hop.class);
+        super(baseDir, "hops-min.json", Hop.class);
     }
 
 }
