@@ -142,7 +142,7 @@ public class BeerXMLWriter implements PunkWriter {
     }
 
     private void createBatchSize(RECIPE recipe, PunkVolume volume) throws BeerXMLExportException {
-        if (!volume.getUnit().equals("liters"))
+        if (!volume.getUnit().equals("litres"))
             throw new BeerXMLExportException("Unsupported volume unit: " + volume.getUnit());
 
         recipe.setBATCHSIZE(volume.getValue());
@@ -150,7 +150,7 @@ public class BeerXMLWriter implements PunkWriter {
     }
 
     private void createBoilBoilSize(RECIPE recipe, PunkBoilVolume volume) throws BeerXMLExportException {
-        if (!volume.getUnit().equals("liters"))
+        if (!volume.getUnit().equals("litres"))
             throw new BeerXMLExportException("Unsupported volume unit: " + volume.getUnit());
 
         recipe.setBOILSIZE(volume.getValue());
