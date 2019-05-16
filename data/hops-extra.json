@@ -1,0 +1,65 @@
+[
+  {
+    "Name": "Fuggles",
+    "AlphaMin": 2.4,
+    "AlphaMax": 5.1,
+    "BetaMin": 2.1,
+    "BetaMax": 2.8
+  },
+  {
+    "Name": "East Kent Golding",
+    "AlphaMin": 5.0,
+    "AlphaMax": 6.0,
+    "BetaMin": 2.0,
+    "BetaMax": 3.0
+  },
+  {
+    "Name": "Nelson Sauvin",
+    "AlphaMin": 12,
+    "AlphaMax": 13,
+    "BetaMin": 6.0,
+    "BetaMax": 8.0
+  },
+  {
+    "Name": "Styrian Goldings",
+    "AlphaMin": 2.8,
+    "AlphaMax": 6.0,
+    "BetaMin": 2.0,
+    "BetaMax": 3.0
+  },
+  {
+    "Name": "Dana",
+    "AlphaMin": 11.0,
+    "AlphaMax": 16.0,
+    "BetaMin": 28.0,
+    "BetaMax": 31.0
+  },
+  {
+    "Name": "Equinox",
+    "AlphaMin": 14.5,
+    "AlphaMax": 15.5,
+    "BetaMin": 4.5,
+    "BetaMax": 5.5
+  },
+  {
+    "Name": "Mount Hood",
+    "AlphaMin": 4.0,
+    "AlphaMax": 6.0,
+    "BetaMin": 5.0,
+    "BetaMax": 8.0
+  },
+  {
+    "Name": "Comet",
+    "AlphaMin": 9.4,
+    "AlphaMax": 12.4,
+    "BetaMin": 3.0,
+    "BetaMax": 6.1
+  },
+  {
+    "Name": "Pacifica",
+    "AlphaMin": 5.0,
+    "AlphaMax": 6.0,
+    "BetaMin": 6.0,
+    "BetaMax": 6.0
+  }
+]
