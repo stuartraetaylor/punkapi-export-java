@@ -39,19 +39,18 @@ wrapper {
 
 jar {
     baseName = 'pinkapiexport'
-    dependsOn 'versionInfo'
+}
+
+processResources {
+    doLast {
+        ant.propertyfile(file: "${project.sourceSets.main.output.resourcesDir}/version-info.properties") {
+            entry(key: 'version', value: project.version)
+        }
+    }
 }
 
 application {
     mainClassName = "${group}.Main"
-}
-
-task versionInfo(type: Task) {
-    doLast {
-        ant.propertyfile(file: "${sourceSets.main.output.resourcesDir}/version-info.properties") {
-            entry(key: 'version', value: project.version)
-        }
-    }
 }
 
 jsonSchema2Pojo {
