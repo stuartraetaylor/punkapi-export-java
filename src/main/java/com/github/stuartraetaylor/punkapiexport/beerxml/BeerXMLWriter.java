@@ -123,6 +123,7 @@ public class BeerXMLWriter implements PunkWriter {
         createYeasts(recipe.getYEASTS(), document.getIngredients().getYeast());
         createMash(recipe.getMASH(), document.getMethod());
         createStyle(recipe.getSTYLE(), document);
+        // TODO twist.
 
         return recipe;
     }
@@ -255,24 +256,14 @@ public class BeerXMLWriter implements PunkWriter {
             case "fv":
             case "fv addition":
                 return HopUse.DRY_HOP;
+            case "wood ageing":
+            case "secondary":
+            case "maturation":
+                return HopUse.SECONDARY;
+            case "mash":
+                return HopUse.MASH;
             default:
-                if (weirdHopException(hopAdd))
-                    return null;
-
                 throw new BeerXMLExportException("Unsupported hop addition: " + hopAdd);
-        }
-    }
-
-    private boolean weirdHopException(String hopAdd) {
-        // FIXME these aren't really hop additions.
-        switch (hopAdd) {
-        case "Wood Ageing":
-        case "Mash":
-        case "secondary":
-        case "maturation":
-            return true;
-        default:
-            return false;
         }
     }
 

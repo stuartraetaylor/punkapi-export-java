@@ -7,7 +7,10 @@ public enum HopUse {
     MIDDLE      ("Boil", 15),
     END         ("Boil", 0),
     WHIRLPOOL   ("Whirlpool", 20),
-    DRY_HOP     ("Dry Hop", null);
+    DRY_HOP("Dry Hop", null),
+
+    SECONDARY   ("Secondary", null),
+    MASH        ("Mash", null);
 
     private final String use;
     private final Integer time;
