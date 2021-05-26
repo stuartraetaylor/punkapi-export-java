@@ -9,32 +9,39 @@ plugins {
 group = 'com.github.stuartraetaylor.punkapiexport'
 version = '0.1.0'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.8'
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+String jaxbVersion = '3.0.1'
 
-    jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.1'
-    jaxb 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+dependencies {
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.8'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
+    implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: jaxbVersion
+
+    runtime group: 'com.sun.xml.bind', name: 'jaxb-impl', version: jaxbVersion
+
+    jaxb group: 'org.glassfish.jaxb', name: 'jaxb-xjc', version: jaxbVersion
+    jaxb group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: jaxbVersion
 }
 
 defaultTasks 'build'
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = '5.4.1'
+    gradleVersion = '6.9'
 }
 
 jar {
