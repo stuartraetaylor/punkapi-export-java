@@ -2,8 +2,8 @@ plugins {
     id 'java'
     id 'application'
     id 'jsonschema2pojo'
-    id 'org.openrepose.gradle.plugins.jaxb' version '2.5.0'
     id 'com.github.jk1.dependency-license-report' version '1.6'
+    id 'com.github.seanrl.jaxb' version '2.5.1'
 }
 
 group = 'com.github.stuartraetaylor.punkapiexport'
@@ -31,7 +31,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
     implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: jaxbVersion
 
-    runtime group: 'com.sun.xml.bind', name: 'jaxb-impl', version: jaxbVersion
+    runtimeOnly group: 'com.sun.xml.bind', name: 'jaxb-impl', version: jaxbVersion
 
     jaxb group: 'org.glassfish.jaxb', name: 'jaxb-xjc', version: jaxbVersion
     jaxb group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: jaxbVersion
@@ -41,7 +41,7 @@ defaultTasks 'build'
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = '6.9'
+    gradleVersion = '7.3.3'
 }
 
 jar {
