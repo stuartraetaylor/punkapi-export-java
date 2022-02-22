@@ -14,7 +14,7 @@ The BeerXML exported recipes are available here: https://github.com/stuartraetay
 
         git clone --recursive https://github.com/stuartraetaylor/punkapi-export-java.git
 
-2. Run the exporter (requires Java 11).
+2. Run the exporter (requires Java 17).
 
         cd punkapi-export-java
         ./gradlew run
