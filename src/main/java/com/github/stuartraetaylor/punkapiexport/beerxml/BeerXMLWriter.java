@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 public class BeerXMLWriter implements PunkWriter {
 
     private static final File baseDir = Paths.get("beerxml").toAbsolutePath().toFile();
+    private static final int BEERXML_VERSION = 1;
 
     // FIXME check these values.
     static final int defaultBoilTime = 60;
@@ -91,6 +92,7 @@ public class BeerXMLWriter implements PunkWriter {
 
     private RECIPES createRecipes(PunkSchema document) throws BeerXMLExportException {
         RECIPES recipes = new RECIPES();
+
         RECIPE recipe = createRecipe(document);
         recipes.getRECIPE().add(recipe);
         return recipes;
@@ -98,8 +100,8 @@ public class BeerXMLWriter implements PunkWriter {
 
     private RECIPE createRecipe(PunkSchema document) throws BeerXMLExportException {
         RECIPE recipe = new RECIPE();
+        recipe.setVERSION(BEERXML_VERSION);
         recipe.setNAME(document.getName());
-        recipe.setVERSION(1);
         recipe.setTYPE("All Grain");
         recipe.setBOILTIME(defaultBoilTime);
         recipe.setEFFICIENCY(defaultEfficiency);
@@ -111,8 +113,8 @@ public class BeerXMLWriter implements PunkWriter {
         recipe.setFERMENTABLES(new FERMENTABLES());
         recipe.setHOPS(new HOPS());
         recipe.setYEASTS(new YEASTS());
-        recipe.setMASH(new MASH());
-        recipe.setSTYLE(new STYLE());
+        recipe.setMASH(newMash());
+        recipe.setSTYLE(newStyle());
 
         createNotes(recipe, document);
         createBatchSize(recipe, document.getVolume());
@@ -177,6 +179,7 @@ public class BeerXMLWriter implements PunkWriter {
     private void createFermentables(FERMENTABLES fermentables, List<PunkMalt> punkMalts) throws BeerXMLExportException {
         for (PunkMalt malt : punkMalts) {
             FERMENTABLE fermentable = new FERMENTABLE();
+            fermentable.setVERSION(1);
             fermentables.getFERMENTABLE().add(fermentable);
 
             fermentable.setNAME(malt.getName());
@@ -201,6 +204,7 @@ public class BeerXMLWriter implements PunkWriter {
     private void createHops(HOPS hops, List<PunkHop> punkHops) throws BeerXMLExportException {
         for (PunkHop punkHop : punkHops) {
             HOP hop = new HOP();
+            hop.setVERSION(BEERXML_VERSION);
             hops.getHOP().add(hop);
             hop.setFORM("pellet");
 
@@ -284,6 +288,7 @@ public class BeerXMLWriter implements PunkWriter {
 
     private void createYeasts(YEASTS yeasts, String punkYeast) {
         YEAST yeast = new YEAST();
+        yeast.setVERSION(BEERXML_VERSION);
         yeast.setAMOUNT(0.1);
         yeasts.setYEAST(yeast);
 
@@ -319,6 +324,7 @@ public class BeerXMLWriter implements PunkWriter {
 
         for (PunkMashTemp punkStep : method.getMashTemp()) {
             MASHSTEP step = new MASHSTEP();
+            step.setVERSION(BEERXML_VERSION);
             mash.getMASHSTEPS().getMASHSTEP().add(step);
 
             if (punkStep.getTemp().getValue() != null)
@@ -417,6 +423,18 @@ public class BeerXMLWriter implements PunkWriter {
             log.warn(message, item);
             warnedRecipeItems.add(item);
         }
+    }
+
+    private STYLE newStyle() {
+        STYLE o = new STYLE();
+        o.setVERSION(BEERXML_VERSION);
+        return o;
+    }
+
+    private MASH newMash() {
+        MASH o = new MASH();
+        o.setVERSION(BEERXML_VERSION);
+        return o;
     }
 
     private final Logger log = LogManager.getLogger(this.getClass());
