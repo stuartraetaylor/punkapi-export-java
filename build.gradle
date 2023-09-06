@@ -2,24 +2,25 @@ plugins {
     id 'java'
     id 'application'
     id 'jsonschema2pojo'
-    id 'com.github.jk1.dependency-license-report' version '1.6'
-    id 'com.github.seanrl.jaxb' version '2.5.1'
+    id 'com.github.jk1.dependency-license-report' version '2.4'
+    id 'com.github.seanrl.jaxb' version '2.5.4'
 }
 
 group = 'com.github.stuartraetaylor.punkapiexport'
-version = '0.1.0'
+version = '0.2.0'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
-String jaxbVersion = '3.0.1'
+String jaxbVersion = '4.0.0'
 
 dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
@@ -40,12 +41,12 @@ dependencies {
 defaultTasks 'build'
 
 wrapper {
-    distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = '7.3.3'
+    distributionType = Wrapper.DistributionType.BIN
+    gradleVersion = '8.3'
 }
 
 jar {
-    baseName = 'pinkapiexport'
+    archiveBaseName = 'pinkapiexport'
 }
 
 processResources {
@@ -57,7 +58,7 @@ processResources {
 }
 
 application {
-    mainClassName = "${group}.Main"
+    mainClass = "${group}.Main"
 }
 
 jsonSchema2Pojo {
