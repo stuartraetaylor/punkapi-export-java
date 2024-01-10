@@ -11,7 +11,7 @@ version = '0.2.0'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -20,16 +20,19 @@ repositories {
     mavenCentral()
 }
 
-String jaxbVersion = '4.0.0'
+String jaxbVersion = '4.0.+'
+String jacksonVersion = '2.16.+'
 
 dependencies {
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.8'
-    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.+'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.+'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.+'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.6.+'
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+
     implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: jaxbVersion
 
     runtimeOnly group: 'com.sun.xml.bind', name: 'jaxb-impl', version: jaxbVersion
@@ -42,7 +45,7 @@ defaultTasks 'build'
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '8.3'
+    gradleVersion = '8.5'
 }
 
 jar {
